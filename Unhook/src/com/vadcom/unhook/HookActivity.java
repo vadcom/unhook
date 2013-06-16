@@ -24,11 +24,11 @@ public class HookActivity extends Activity {
     SimpleAdapter sAdapter;
 
     // массивы данных
-    String[] text1 = { "sometext 1", "sometext 2", "sometext 3",
-        "sometext 4", "sometext 5" };
-    String[] text2 = { "nexttext 1", "nexttext 2", "nexttext 3",
-	        "nexttext 4", "nexttext 5" };
-    boolean[] checked = { true, false, false, true, false };
+    String[] text1 = { "65 55", "45 46", "88 99",
+        "48 45", "77 78" };
+    String[] text2 = { "45321", "78512", "45895",
+	        "15565", "12565" };
+    boolean[] checked = { false, false, false, false, false };
     
     ArrayList<Map<String, Object>> data;
 	  
@@ -83,10 +83,6 @@ public class HookActivity extends Activity {
 	    sAdapter = new SimpleAdapter(this, data, R.layout.item,
 	        from, to);
 	    lvSimple.setAdapter(sAdapter);
-	   // lvSimple.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
-		//lvSimple.setClickable(true);
-		
-		//listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 		
 		lvSimple.setOnItemClickListener (new AdapterView.OnItemClickListener(){
 
