@@ -19,6 +19,7 @@ public class HookActivity extends Activity {
     final String ATTRIBUTE_NAME_TEXT2 = "text2";
     final String ATTRIBUTE_NAME_CHECKED = "checked";
     final String ATTRIBUTE_NAME_IMAGE = "image";
+    final String ATTRIBUTE_NAME_BACK = "back";
   
     ListView lvSimple;
     SimpleAdapter sAdapter;
@@ -68,6 +69,7 @@ public class HookActivity extends Activity {
 	      m.put(ATTRIBUTE_NAME_TEXT1, text1[i]);
 	      m.put(ATTRIBUTE_NAME_TEXT2, text2[i]);
 	      m.put(ATTRIBUTE_NAME_CHECKED, checked[i]);
+	     // m.put(ATTRIBUTE_NAME_BACK, new Drawable());
 	      //m.put(ATTRIBUTE_NAME_IMAGE, img);
 	      data.add(m);
 	    }

@@ -80,7 +80,7 @@ public class ConnectedThread extends Thread {
          // Keep listening to the InputStream until an exception occurs
          while (true) {
              try {
-            	 String hello="Hello from telephone!\n";
+            	 String hello="read\n";
             	 write(hello.getBytes());
                  // Read from the InputStream
                  bytes = mmInStream.read(buffer);
