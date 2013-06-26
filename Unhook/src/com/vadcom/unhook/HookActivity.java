@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import android.app.Activity;
+import android.content.res.Resources;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -64,11 +67,16 @@ public class HookActivity extends Activity {
 	    ArrayList<Map<String, Object>> data = new ArrayList<Map<String, Object>>(
 	        text1.length);
 	    Map<String, Object> m;
+	    Resources res = getResources();
 	    for (int i = 0; i < text1.length; i++) {
 	      m = new HashMap<String, Object>();
 	      m.put(ATTRIBUTE_NAME_TEXT1, text1[i]);
 	      m.put(ATTRIBUTE_NAME_TEXT2, text2[i]);
 	      m.put(ATTRIBUTE_NAME_CHECKED, checked[i]);
+  	      //Drawable drawable = res.getDrawable(R.drawable.ic_launcher);
+  	      if (i%2==0) {
+  	    	  m.put(ATTRIBUTE_NAME_BACK, R.drawable.red);
+  	      }
 	     // m.put(ATTRIBUTE_NAME_BACK, new Drawable());
 	      //m.put(ATTRIBUTE_NAME_IMAGE, img);
 	      data.add(m);
@@ -76,10 +84,10 @@ public class HookActivity extends Activity {
 
 	    // массив имен атрибутов, из которых будут читаться данные
 	    String[] from = { ATTRIBUTE_NAME_TEXT1, ATTRIBUTE_NAME_TEXT2,
-	    				  ATTRIBUTE_NAME_CHECKED };
+	    				  ATTRIBUTE_NAME_CHECKED,ATTRIBUTE_NAME_BACK};
 	    //ATTRIBUTE_NAME_IMAGE 
 	    // массив ID View-компонентов, в которые будут вставлять данные
-	    int[] to = { R.id.text1, R.id.text2, R.id.check};
+	    int[] to = { R.id.text1, R.id.text2, R.id.check,R.id.imageView1};
 
 	    // создаем адаптер
 	    sAdapter = new SimpleAdapter(this, data, R.layout.item,
