@@ -1,38 +1,39 @@
+/*   _   _       _                 _    
+	| | | |_ __ | |__   ___   ___ | | __
+	| | | | '_ \| '_ \ / _ \ / _ \| |/ /
+	| |_| | | | | | | | (_) | (_) |   < 
+	 \___/|_| |_|_| |_|\___/ \___/|_|\_\
+*/	 
 package com.vadcom.unhook;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.vadcom.unhook.UnhookData.UnhookLine;
+
 import android.app.Activity;
-import android.content.res.Resources;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-
-public class HookActivity extends Activity {
-	
+/**
+ * Отображение списка расцепов и работа с ними
+ * @author Дубина Вадим
+ */
+public class HookActivity extends Activity {	
 	// имена атрибутов для Map
     final String ATTRIBUTE_NAME_TEXT1 = "text1";
     final String ATTRIBUTE_NAME_TEXT2 = "text2";
-    final String ATTRIBUTE_NAME_CHECKED = "checked";
-    final String ATTRIBUTE_NAME_IMAGE = "image";
+    final String ATTRIBUTE_NAME_TEXT3 = "text3";
+    final String ATTRIBUTE_NAME_UKAZ = "image";
     final String ATTRIBUTE_NAME_BACK = "back";
   
     ListView lvSimple;
     SimpleAdapter sAdapter;
-
-    // массивы данных
-    String[] text1 = { "65 55", "45 46", "88 99",
-        "48 45", "77 78" };
-    String[] text2 = { "45321", "78512", "45895",
-	        "15565", "12565" };
-    boolean[] checked = { false, false, false, false, false };
+    UnhookData unhooks=new UnhookData();		// Расцепы
     
     ArrayList<Map<String, Object>> data;
 	  
@@ -64,6 +65,7 @@ public class HookActivity extends Activity {
 	    //int img = R.drawable.ic_launcher;
 
 	    // упаковываем данные в понятную для адаптера структуру
+		/*
 	    ArrayList<Map<String, Object>> data = new ArrayList<Map<String, Object>>(
 	        text1.length);
 	    Map<String, Object> m;
@@ -93,29 +95,79 @@ public class HookActivity extends Activity {
 	    sAdapter = new SimpleAdapter(this, data, R.layout.item,
 	        from, to);
 	    lvSimple.setAdapter(sAdapter);
-		
+		*/
 		lvSimple.setOnItemClickListener (new AdapterView.OnItemClickListener(){
 
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {				
+				/*
 				boolean unhook=(Boolean) ((Map<String, Object>)lvSimple.getItemAtPosition(arg2)).get(ATTRIBUTE_NAME_CHECKED);
 				((Map<String, Object>)lvSimple.getItemAtPosition(arg2)).put(ATTRIBUTE_NAME_CHECKED, !unhook);
 				sAdapter.notifyDataSetChanged ();
+				*/
 			}
 			
 		});	
-		lvSimple.setSelection(0);
+		//lvSimple.setSelection(0);
 	}
 	
-	public void checkClick(View view) {
-		int s=lvSimple.getSelectedItemPosition();
-		//lvSimple.get
-		if (s>=0) {
-			text1[s]="ready";
-		}
-		lvSimple.invalidate();
-	}
+	/**
+	 * Обработчик ответов от потока команд 
+	 */
+	Handler handler = new Handler() {
+        public void handleMessage(android.os.Message msg) {
+        	switch (msg.what) {
+			case CommThread.READ_COMM:{
+				// Прочитан список расцепов
+				unhooks=(UnhookData)msg.obj;
+				refreshList();
+				break;
+			}
+			default: System.err.println("Неизвестный ответ от потока команд");				        		
+        	}        	
+        }
+    };
+    /**
+     * Обновление списка отображаемых расцепов
+     */
+    private void refreshList(){
+	    // упаковываем данные в понятную для адаптера структуру
+	    ArrayList<Map<String, Object>> data = new ArrayList<Map<String, Object>>(unhooks.getCount());
+	    Map<String, Object> m;
+	    //Resources res = getResources();
+	    // массив имен атрибутов, из которых будут читаться данные
+	    String[] from = { ATTRIBUTE_NAME_TEXT1, ATTRIBUTE_NAME_TEXT2,ATTRIBUTE_NAME_TEXT3,
+	    				  ATTRIBUTE_NAME_UKAZ,ATTRIBUTE_NAME_BACK};
+	    //ATTRIBUTE_NAME_IMAGE 
+	    // массив ID View-компонентов, в которые будут вставлять данные
+	    int[] to = { R.id.textNomer, R.id.textCount,  R.id.textVagon,R.id.imageUkaz,R.id.imageView1};
+	    
+	    for (int i = 0; i < unhooks.getCount(); i++) {
+		      m = new HashMap<String, Object>();
+		      UnhookLine line=unhooks.getLine(i);		      
+		      m.put(ATTRIBUTE_NAME_TEXT1, line.nomer);
+		      m.put(ATTRIBUTE_NAME_TEXT2, line.count);
+		      m.put(ATTRIBUTE_NAME_TEXT3, line.vagon);
+	  	      if (line.color==1) {
+	  	    	  m.put(ATTRIBUTE_NAME_BACK, R.drawable.red);
+	  	      }	  	      
+	  	      if (i+1==unhooks.currentLine) {
+	  	    	m.put(ATTRIBUTE_NAME_UKAZ, R.drawable.ic_launcher);
+	  	      } else {
+	  	    	m.put(ATTRIBUTE_NAME_UKAZ, 0); ///???  
+	  	      }
+		      data.add(m);
+		    }
+	    // создаем адаптер
+	    sAdapter = new SimpleAdapter(this, data, R.layout.item,
+	        from, to);
+	    lvSimple.setAdapter(sAdapter);
+    }
 	
-	
+    @Override
+    protected void onStart(){
+    	super.onStart();
+    	new CommThread(CommThread.READ_COMM, ConnectThread.mmSocket, handler).start();
+    }
 }

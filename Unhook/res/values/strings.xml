@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Расцепка</string>
+    <string name="app_name">ПГС</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
     <string name="get_data">Получение данных</string>
     <string name="getted">Данные получены</string>
-    <string name="col1">Номера</string>
-    <string name="co2">Вагон</string>
-    <string name="col3">Готово</string>
+    <string name="col1">№</string>
+    <string name="co2">Количество</string>
+    <string name="col3">Последний вагон</string>
+    <string name="doConnect">Соединиться</string>
+    <string name="startConnect">Установка соединения</string>
+    <string name="errorConnect">Нет соединения</string>
 
 </resources>

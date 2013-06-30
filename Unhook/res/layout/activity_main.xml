@@ -16,7 +16,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="78dp"
-        android:text="@string/get_data"
+        android:text="@string/startConnect"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <ProgressBar
@@ -26,5 +26,16 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true" />
+
+    <Button
+        android:id="@+id/buttonConnect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/progressBar1"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="62dp"
+        android:onClick="onClick"
+        android:text="@string/doConnect"
+        android:visibility="invisible" />
 
 </RelativeLayout>

@@ -38,43 +38,44 @@ public class SampleSPPServer {
         String connectionString = "btspp://localhost:" + uuid +";name=Sample SPP Server";
        
         //open server url
-        StreamConnectionNotifier streamConnNotifier = (StreamConnectionNotifier)Connector.open( connectionString );
-       
-        //Wait for client connection
-        System.out.println("connectionString: "+connectionString);
-        System.out.println("\nServer Started. Waiting for clients to connect...");
-        StreamConnection connection=streamConnNotifier.acceptAndOpen();
- 
-        RemoteDevice dev = RemoteDevice.getRemoteDevice(connection);
-        System.out.println("Remote device address: "+dev.getBluetoothAddress());
-        System.out.println("Remote device name: "+dev.getFriendlyName(true));
-              
-        //read string from spp client
-        InputStream inStream=connection.openInputStream();
-        BufferedReader bReader=new BufferedReader(new InputStreamReader(inStream));
-        OutputStream outStream=connection.openOutputStream();
-        PrintWriter pWriter=new PrintWriter(new OutputStreamWriter(outStream));
-        while (true) {
-        
-        String lineRead=bReader.readLine();
-        System.out.println(lineRead);
-        if (lineRead.equalsIgnoreCase("read")) {
-        	commRead(pWriter);
-        };
-        
-        //send response to spp client
-        /*
-        pWriter.write("Response String from SPP Server\r\n");
-        pWriter.flush();
-        */
-        }
-        //pWriter.close();
-        //streamConnNotifier.close();
+	        StreamConnectionNotifier streamConnNotifier = (StreamConnectionNotifier)Connector.open( connectionString );
+	       
+	        //Wait for client connection
+	        System.out.println("connectionString: "+connectionString);
+	        System.out.println("\nServer Started. Waiting for clients to connect...");
+	        StreamConnection connection=streamConnNotifier.acceptAndOpen();
+	        RemoteDevice dev = RemoteDevice.getRemoteDevice(connection);
+	        System.out.println("Remote device address: "+dev.getBluetoothAddress());
+	        System.out.println("Remote device name: "+dev.getFriendlyName(true));
+	              
+	        //read string from spp client
+	        InputStream inStream=connection.openInputStream();
+	        BufferedReader bReader=new BufferedReader(new InputStreamReader(inStream));
+	        OutputStream outStream=connection.openOutputStream();
+	        PrintWriter pWriter=new PrintWriter(new OutputStreamWriter(outStream));        
+	        while (true) {
+		        System.out.println("Ожидаем поступления команды...");
+		        String lineRead=bReader.readLine();
+		        if (lineRead==null) {
+		        	connection.close();
+		        	return;
+		        }
+		        if (lineRead.equalsIgnoreCase("read")) {
+		        	commRead(pWriter);
+		        } else {
+		            System.out.println("Неизвестная команда: "+lineRead);        	
+		        }        
+	        }	        
     }
-    
+    /**
+     * Команда чтения списка расцепов
+     * @param pWriter
+     */
     private void commRead(PrintWriter pWriter){
+    	System.out.println("Выполняем команду READ");
     	pWriter.write(md5summ+'\n');
-    	pWriter.write(CurrentUnhook+'\n');
+    	pWriter.write(String.valueOf(CurrentUnhook)+'\n');
+    	pWriter.write(String.valueOf(unhooks.size())+'\n');
     	for (String line:unhooks) {
     		pWriter.write(line+'\n');
     	}
@@ -102,16 +103,29 @@ public class SampleSPPServer {
     	System.out.println("-----------------------");
     }
     
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         
-        //display local device address and name
-        LocalDevice localDevice = LocalDevice.getLocalDevice();
-        System.out.println("Address: "+localDevice.getBluetoothAddress());
-        System.out.println("Name: "+localDevice.getFriendlyName());
-       
-        SampleSPPServer sampleSPPServer=new SampleSPPServer();
-        sampleSPPServer.startServer();
-       
+    	System.out.println(" ____  _            ____");                           
+    	System.out.println("| __ )| |_   _  ___/ ___|  ___ _ ____   _____ _ __"); 
+    	System.out.println("|  _ \\| | | | |/ _ \\___ \\ / _ \\ '__\\ \\ / / _ \\ '__|");
+    	System.out.println("| |_) | | |_| |  __/___) |  __/ |   \\ V /  __/ |   ");
+    	System.out.println("|____/|_|\\__,_|\\___|____/ \\___|_|    \\_/ \\___|_|");    	
+
+    	// while (true) {
+	        //display local device address and name
+	        LocalDevice localDevice;
+			try {
+				localDevice = LocalDevice.getLocalDevice();
+		        System.out.println("Address: "+localDevice.getBluetoothAddress());
+		        System.out.println("Name: "+localDevice.getFriendlyName());       
+		        SampleSPPServer sampleSPPServer=new SampleSPPServer();        
+		        sampleSPPServer.startServer();
+			} catch (BluetoothStateException e) {
+			} catch (IOException e) {
+			}
+			System.out.println("Соединение разорванно.");
+    	// }       
+    	
     }
     
 }
