@@ -43,72 +43,41 @@ public class HookActivity extends Activity {
 		setContentView(R.layout.list);
 		
 		lvSimple = (ListView) findViewById(R.id.lvSimple);
-		//lvSimple.setSelector(R.drawable.ic_launcher);
-	    //gridview.setAdapter(new ImageAdapter(this));
 		/*
-		lvSimple.setOnTouchListener(new OnTouchListener()
-		{
-			@Override
-			public boolean onTouch(View arg0, MotionEvent arg1) {
-				// TODO Auto-generated method stub
-				return false;
-			}
-		});
-		*/
-		
-		//lvSimple.setItemsCanFocus (true);
-		
-		//inflater.inflate(R.layout.header, null);
-		
-		// lvSimple.addHeaderView(findViewById(R.layout.header));
-
-	    //int img = R.drawable.ic_launcher;
-
-	    // упаковываем данные в понятную для адаптера структуру
-		/*
-	    ArrayList<Map<String, Object>> data = new ArrayList<Map<String, Object>>(
-	        text1.length);
-	    Map<String, Object> m;
-	    Resources res = getResources();
-	    for (int i = 0; i < text1.length; i++) {
-	      m = new HashMap<String, Object>();
-	      m.put(ATTRIBUTE_NAME_TEXT1, text1[i]);
-	      m.put(ATTRIBUTE_NAME_TEXT2, text2[i]);
-	      m.put(ATTRIBUTE_NAME_CHECKED, checked[i]);
-  	      //Drawable drawable = res.getDrawable(R.drawable.ic_launcher);
-  	      if (i%2==0) {
-  	    	  m.put(ATTRIBUTE_NAME_BACK, R.drawable.red);
-  	      }
-	     // m.put(ATTRIBUTE_NAME_BACK, new Drawable());
-	      //m.put(ATTRIBUTE_NAME_IMAGE, img);
-	      data.add(m);
-	    }
-
-	    // массив имен атрибутов, из которых будут читаться данные
-	    String[] from = { ATTRIBUTE_NAME_TEXT1, ATTRIBUTE_NAME_TEXT2,
-	    				  ATTRIBUTE_NAME_CHECKED,ATTRIBUTE_NAME_BACK};
-	    //ATTRIBUTE_NAME_IMAGE 
-	    // массив ID View-компонентов, в которые будут вставлять данные
-	    int[] to = { R.id.text1, R.id.text2, R.id.check,R.id.imageView1};
-
-	    // создаем адаптер
-	    sAdapter = new SimpleAdapter(this, data, R.layout.item,
-	        from, to);
-	    lvSimple.setAdapter(sAdapter);
-		*/
 		lvSimple.setOnItemClickListener (new AdapterView.OnItemClickListener(){
-
 			@Override
-			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-					long arg3) {				
-				/*
-				boolean unhook=(Boolean) ((Map<String, Object>)lvSimple.getItemAtPosition(arg2)).get(ATTRIBUTE_NAME_CHECKED);
-				((Map<String, Object>)lvSimple.getItemAtPosition(arg2)).put(ATTRIBUTE_NAME_CHECKED, !unhook);
-				sAdapter.notifyDataSetChanged ();
-				*/
+			public void onItemClick(AdapterView<?> arg0, View arg1, int pos,
+					long arg3) {
+				if (pos+1==unhooks.currentLine) {
+					((Map<String, Object>)lvSimple.getItemAtPosition(unhooks.currentLine-1)).put(ATTRIBUTE_NAME_UKAZ, R.drawable.clean);
+					unhooks.currentLine++;
+					if (unhooks.currentLine<=unhooks.getCount()) {
+						((Map<String, Object>)lvSimple.getItemAtPosition(unhooks.currentLine-1)).put(ATTRIBUTE_NAME_UKAZ, R.drawable.pointer);
+					}
+					sAdapter.notifyDataSetChanged ();
+				}
 			}
 			
 		});	
+		*/
+		lvSimple.setOnItemLongClickListener (new AdapterView.OnItemLongClickListener(){
+			@Override
+			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
+					int pos, long arg3) {
+				if (pos+1==unhooks.currentLine) {
+					((Map<String, Object>)lvSimple.getItemAtPosition(unhooks.currentLine-1)).put(ATTRIBUTE_NAME_UKAZ, R.drawable.clean);
+					unhooks.currentLine++;
+					if (unhooks.currentLine<=unhooks.getCount()) {
+						((Map<String, Object>)lvSimple.getItemAtPosition(unhooks.currentLine-1)).put(ATTRIBUTE_NAME_UKAZ, R.drawable.pointer);
+					}
+					sAdapter.notifyDataSetChanged ();
+					return true;
+				}
+				return false;
+			}
+			
+		});
+		
 		//lvSimple.setSelection(0);
 	}
 	
@@ -151,11 +120,13 @@ public class HookActivity extends Activity {
 		      m.put(ATTRIBUTE_NAME_TEXT3, line.vagon);
 	  	      if (line.color==1) {
 	  	    	  m.put(ATTRIBUTE_NAME_BACK, R.drawable.red);
+	  	      } else {	  	      
+	  	    	  m.put(ATTRIBUTE_NAME_BACK, R.drawable.clean);
 	  	      }	  	      
 	  	      if (i+1==unhooks.currentLine) {
-	  	    	m.put(ATTRIBUTE_NAME_UKAZ, R.drawable.ic_launcher);
+	  	    	m.put(ATTRIBUTE_NAME_UKAZ, R.drawable.pointer);
 	  	      } else {
-	  	    	m.put(ATTRIBUTE_NAME_UKAZ, 0); ///???  
+	  	    	 m.put(ATTRIBUTE_NAME_UKAZ, R.drawable.clean);   
 	  	      }
 		      data.add(m);
 		    }
