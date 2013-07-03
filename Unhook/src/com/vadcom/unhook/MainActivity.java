@@ -30,7 +30,7 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		//timer=new Timer();
+		tv = (TextView) findViewById(R.id.textView1);				
 	}
 	
 /*
@@ -60,35 +60,7 @@ public class MainActivity extends Activity {
 		} else {
 			startHook();
 		}
-		/*
-		TextView tvLoad = (TextView) findViewById(R.id.textView1);		
-		String get_data  =  getString (R.string.get_data); 		
-		tvLoad.setText(get_data);
-		// Запуск таймера
-		timer.schedule(new TimerTask(){
-
-			@Override
-			public void run() {
-				//timer.cancel();
-				timer.purge();
-				handler.sendEmptyMessage(0);			
-			}}
-		, 1000);
-		*/
 	}
-	/*
-	TimerTask tt=new TimerTask(){
-
-		@Override
-		public void run() {
-			timer.cancel();
-			timer.purge();
-			handler.sendEmptyMessage(0);			
-		}
-		
-	};
-	*/
-	
 	/**
 	 * Обработчик сообщений от потока установки соединения
 	 */
@@ -124,7 +96,6 @@ public class MainActivity extends Activity {
 	 */
 	private void StartConnect() {
 		mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-		TextView tv = (TextView) findViewById(R.id.textView1);		
 		if (mBluetoothAdapter==null) {
 			// Зажигаем надпись об отсутствии адаптера
 			tv.setText("No bluetouch adapter!");					

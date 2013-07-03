@@ -32,6 +32,7 @@ public class CommThread extends Thread {
     final static int READ_COMM=1; 
     final static int UNHOOK_COMM=2; 
     final static int CHECK_COMM=3; 
+    final static int BACK_COMM=4; 
     
 //    public class UnhookData
     
@@ -52,17 +53,25 @@ public class CommThread extends Thread {
 	
 	@Override
 	public void run(){
-		switch (mCommand) {
-			case READ_COMM:{
-				try {
-					doRead();
-				} catch (IOException e) {
-					e.printStackTrace();
+		try {
+			switch (mCommand) {
+				case READ_COMM:{
+						doRead();
+					break;
 				}
-				break;
+				case UNHOOK_COMM:{
+					doUnhook();
+					break;
+				}
+				case BACK_COMM:{
+					doBack();
+					break;
+				}								
+				default: System.err.println("Неизвестная команда ПГС->ТГС");				
 			}
-			default: System.err.println("Неизвестная команда ПГС->ТГС");				
-		}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
 	}
 	/**
 	 * Получение списка расцепов от табло 
@@ -89,6 +98,23 @@ public class CommThread extends Thread {
         }
         mHandler.obtainMessage(READ_COMM, data).sendToTarget();
 	}
+
+	private void doUnhook() throws IOException{
+		// Отправляем запрос
+		String command="unhook\n";
+   	 	write(command.getBytes());
+   	 	// Получаем ответ
+        bReader.readLine();
+	}
+	
+	private void doBack() throws IOException{
+		// Отправляем запрос
+		String command="back\n";
+   	 	write(command.getBytes());
+   	 	// Получаем ответ
+        bReader.readLine();
+	}
+	
 	
     private void write(byte[] bytes) {
         try {

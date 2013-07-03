@@ -29,10 +29,10 @@ public class UnhookData {
 		}
 	}
 	List<UnhookLine> data=new ArrayList<UnhookLine>();
-	public int currentLine;
+	public int currentLine;	// Начинается от 0
 	
 	public UnhookData (){
-		currentLine=-1;
+		currentLine=0;
 	}
 	
 	public int getCount() {
@@ -42,6 +42,13 @@ public class UnhookData {
 	public UnhookLine getLine(int index) {
 		return data.get(index);
 	}
+	
+	public UnhookLine getLine() {
+		if (currentLine<data.size()) {
+			return data.get(currentLine);
+		} else return null;
+	}
+	
 	
 	public void add(String line) {
 		data.add(new UnhookLine(line));

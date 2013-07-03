@@ -24,7 +24,7 @@ import javax.microedition.io.*;
 public class SampleSPPServer {
 	
 	ArrayList<String> unhooks=new ArrayList<String>();
-	int CurrentUnhook=0;
+	int CurrentUnhook=-1;
 	String md5summ="0123210";
    
     //start server
@@ -62,9 +62,18 @@ public class SampleSPPServer {
 		        }
 		        if (lineRead.equalsIgnoreCase("read")) {
 		        	commRead(pWriter);
-		        } else {
-		            System.out.println("Неизвестная команда: "+lineRead);        	
-		        }        
+		        	continue;
+		        }
+		        if (lineRead.equalsIgnoreCase("unhook")) {
+		        	commUnhook(pWriter);
+		        	continue;
+		        } 		        
+		        if (lineRead.equalsIgnoreCase("back")) {
+		        	commBack(pWriter);
+		        	continue;
+		        } 		        
+		        System.out.println("Неизвестная команда: "+lineRead);        	
+		               
 	        }	        
     }
     /**
@@ -81,9 +90,40 @@ public class SampleSPPServer {
     	}
         pWriter.flush();
     }
- 
- 
     
+    private void commUnhook(PrintWriter pWriter){
+    	System.out.println("Выполняем команду UNHOOK");
+    	if (CurrentUnhook<unhooks.size()) {
+    		CurrentUnhook++;
+    		if (CurrentUnhook<unhooks.size()) System.out.println("Текущий расцеп -> "+unhooks.get(CurrentUnhook));
+    		else System.out.println("Все расцепы выполнены.");
+    		pWriter.write("ok\n");
+    	} else {
+    		System.out.println("Ошибка, выход за конец списка расцепов");
+    		System.out.println("Текущий расцеп -> "+unhooks.get(CurrentUnhook));
+    		pWriter.write("error\n");
+    	}
+    }
+
+    private void commBack(PrintWriter pWriter){
+    	System.out.println("Выполняем команду BACK");
+    	if (CurrentUnhook>0) {
+    		CurrentUnhook--;
+    		System.out.println("Текущий расцеп -> "+unhooks.get(CurrentUnhook));
+    		pWriter.write("ok\n");
+    	} else {
+    		System.out.println("Ошибка, выход за начало списка расцепов");
+    		System.out.println("Текущий расцеп -> "+unhooks.get(CurrentUnhook));
+    		pWriter.write("error\n");
+    	}
+    }
+    
+    
+    /**
+     * Чтение списка расцепов из файла
+     * @param file
+     * @throws IOException
+     */
     private void load(String file) throws IOException{
     	unhooks.clear();
     	BufferedReader br=new BufferedReader(new FileReader(file));
@@ -91,16 +131,18 @@ public class SampleSPPServer {
     		unhooks.add(br.readLine());
     	};   
     	br.close();
-    	if (unhooks.size()>0) CurrentUnhook=1;
+    	if (unhooks.size()>0) CurrentUnhook=0;
     }
     
     private void show(){
+    	/*
     	System.out.println("--- список расцепов ---");
     	for (String line:unhooks) {
     		System.out.println(line);
     	}
-    	System.out.println("Текущий расцеп № "+CurrentUnhook); 
     	System.out.println("-----------------------");
+    	*/
+    	System.out.println("Текущий расцеп -> "+unhooks.get(CurrentUnhook));
     }
     
     public static void main(String[] args) {
