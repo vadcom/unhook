@@ -18,7 +18,10 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
+import android.widget.EdgeEffect;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 /**
@@ -66,11 +69,12 @@ public class HookActivity extends Activity {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
 					int pos, long arg3) {
+				pos--;
 				if (pos==unhooks.currentLine) {
-					((Map<String, Object>)lvSimple.getItemAtPosition(unhooks.currentLine)).put(ATTRIBUTE_NAME_UKAZ, R.drawable.check);
+					((Map<String, Object>)lvSimple.getItemAtPosition(unhooks.currentLine+1)).put(ATTRIBUTE_NAME_UKAZ, R.drawable.check);
 					unhooks.currentLine++;
 					if (unhooks.currentLine<unhooks.getCount()) {
-						((Map<String, Object>)lvSimple.getItemAtPosition(unhooks.currentLine)).put(ATTRIBUTE_NAME_UKAZ, R.drawable.pointer);
+						((Map<String, Object>)lvSimple.getItemAtPosition(unhooks.currentLine+1)).put(ATTRIBUTE_NAME_UKAZ, R.drawable.pointer);
 					}
 	    			new CommThread(CommThread.UNHOOK_COMM, ConnectThread.mmSocket, handler).start(); // Команда серверу
 					sAdapter.notifyDataSetChanged ();
@@ -80,6 +84,34 @@ public class HookActivity extends Activity {
 			}
 			
 		});
+		/*
+		lvSimple.setOnScrollListener(new OnScrollListener(){
+
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem,
+					int visibleItemCount, int totalItemCount) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void onScrollStateChanged(AbsListView view, int scrollState) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		*/
+		View footer = getLayoutInflater().inflate(R.layout.bottom, null);
+		View header = getLayoutInflater().inflate(R.layout.bottom, null);
+		lvSimple.addFooterView(footer);
+		lvSimple.addHeaderView(header);
+		
+		// lvSimple.setOverscrollFooter(R.drawable.red);
+		//EdgeEffect ef=new EdgeEffect(this);
+		//ef.setSize(100, 100);
+		// lvSimple.setOverScrollMode(ListView.OVER_SCROLL_NEVER);
+		
 	}
 	
 	/**
@@ -136,6 +168,8 @@ public class HookActivity extends Activity {
 	    sAdapter = new SimpleAdapter(this, data, R.layout.item,
 	        from, to);
 	    lvSimple.setAdapter(sAdapter);
+	    //lvSimple.setVerticalFadingEdgeEnabled(true);
+	    //lvSimple.smoothScrollToPosition (12);
     }
     
     @Override
@@ -172,11 +206,11 @@ public class HookActivity extends Activity {
     	                // Write your code here to execute after dialog
     	    	    	// По возврату отменяем выполненную расцепку
     	            	if (unhooks.currentLine<unhooks.getCount()) {
-    	            		((Map<String, Object>)lvSimple.getItemAtPosition(unhooks.currentLine)).put(ATTRIBUTE_NAME_UKAZ, R.drawable.clean);
+    	            		((Map<String, Object>)lvSimple.getItemAtPosition(unhooks.currentLine+1)).put(ATTRIBUTE_NAME_UKAZ, R.drawable.clean);
     	            	}
     	    			unhooks.currentLine--;
     	    			if (unhooks.currentLine<unhooks.getCount()) {
-    	    				((Map<String, Object>)lvSimple.getItemAtPosition(unhooks.currentLine)).put(ATTRIBUTE_NAME_UKAZ, R.drawable.pointer);
+    	    				((Map<String, Object>)lvSimple.getItemAtPosition(unhooks.currentLine+1)).put(ATTRIBUTE_NAME_UKAZ, R.drawable.pointer);
     	    			}
     	    			new CommThread(CommThread.BACK_COMM, ConnectThread.mmSocket, handler).start(); // Команда серверу
     	    			sAdapter.notifyDataSetChanged ();

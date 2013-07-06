@@ -16,14 +16,16 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.vadcom.unhook.MainActivity"
-            android:label="@string/app_name" >
+            android:label="@string/app_name" 
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="HookActivity"></activity>
+        <activity android:name="HookActivity" android:screenOrientation="portrait">            
+        </activity>
     </application>
 
 </manifest>
