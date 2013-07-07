@@ -5,6 +5,6 @@
     android:layout_height="5dp"
     android:background="#66869f"
     android:gravity="center_vertical|center_horizontal"
-    android:textSize="5dp" >
+    android:textSize="5sp" >
 
 </TextView>

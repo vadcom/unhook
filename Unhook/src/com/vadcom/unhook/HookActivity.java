@@ -35,6 +35,10 @@ public class HookActivity extends Activity {
     final String ATTRIBUTE_NAME_TEXT3 = "text3";
     final String ATTRIBUTE_NAME_UKAZ = "image";
     final String ATTRIBUTE_NAME_BACK = "back";
+    final String ATTRIBUTE_NAME_TOP = "top";
+    final String ATTRIBUTE_NAME_BOTTOM = "bottom";
+    final String ATTRIBUTE_NAME_LEFT = "left";
+    final String ATTRIBUTE_NAME_RIGHT = "right";
   
     ListView lvSimple;
     SimpleAdapter sAdapter;
@@ -68,16 +72,15 @@ public class HookActivity extends Activity {
 		lvSimple.setOnItemLongClickListener (new AdapterView.OnItemLongClickListener(){
 			@Override
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
-					int pos, long arg3) {
+					int pos, long arg3) {				
 				pos--;
-				if (pos==unhooks.currentLine) {
-					((Map<String, Object>)lvSimple.getItemAtPosition(unhooks.currentLine+1)).put(ATTRIBUTE_NAME_UKAZ, R.drawable.check);
+				if (unhooks.currentLine==0) pos--;
+				
+				if ((pos==unhooks.currentLine) && (unhooks.getCount()>unhooks.currentLine)) {
+					if (unhooks.currentLine==0) removeFirstBlank();
 					unhooks.currentLine++;
-					if (unhooks.currentLine<unhooks.getCount()) {
-						((Map<String, Object>)lvSimple.getItemAtPosition(unhooks.currentLine+1)).put(ATTRIBUTE_NAME_UKAZ, R.drawable.pointer);
-					}
-	    			new CommThread(CommThread.UNHOOK_COMM, ConnectThread.mmSocket, handler).start(); // Команда серверу
-					sAdapter.notifyDataSetChanged ();
+					updateListView();
+					lvSimple.smoothScrollToPositionFromTop(unhooks.currentLine, 0);
 					return true;
 				}
 				return false;
@@ -131,18 +134,22 @@ public class HookActivity extends Activity {
         }
     };
     /**
-     * Обновление списка отображаемых расцепов
+     * Загрузка списка отображаемых расцепов
      */
     private void refreshList(){
 	    // упаковываем данные в понятную для адаптера структуру
-	    ArrayList<Map<String, Object>> data = new ArrayList<Map<String, Object>>(unhooks.getCount());
+	    data = new ArrayList<Map<String, Object>>(unhooks.getCount());
 	    Map<String, Object> m;
 	    // массив имен атрибутов, из которых будут читаться данные
 	    String[] from = { ATTRIBUTE_NAME_TEXT1, ATTRIBUTE_NAME_TEXT2,ATTRIBUTE_NAME_TEXT3,
-	    				  ATTRIBUTE_NAME_UKAZ,ATTRIBUTE_NAME_BACK};
+	    				  ATTRIBUTE_NAME_UKAZ,ATTRIBUTE_NAME_BACK,
+	    				  ATTRIBUTE_NAME_TOP,
+					      ATTRIBUTE_NAME_BOTTOM,
+					      ATTRIBUTE_NAME_LEFT,
+					      ATTRIBUTE_NAME_RIGHT};
 	    // массив ID View-компонентов, в которые будут вставлять данные
-	    int[] to = { R.id.textNomer, R.id.textCount,  R.id.textVagon,R.id.imageUkaz,R.id.imageView1};
-	    
+	    int[] to = { R.id.textNomer, R.id.textCount,  R.id.textVagon,R.id.imageUkaz,R.id.imageView1,
+	    		     R.id.borderTop,R.id.borderBottom,R.id.borderLeft,R.id.borderRight};	    
 	    for (int i = 0; i < unhooks.getCount(); i++) {
 		      m = new HashMap<String, Object>();
 		      UnhookLine line=unhooks.getLine(i);		      
@@ -160,10 +167,32 @@ public class HookActivity extends Activity {
 	  	    	m.put(ATTRIBUTE_NAME_UKAZ, R.drawable.pointer);
 	  	      } else {
 	  	    	  if (i<unhooks.currentLine) m.put(ATTRIBUTE_NAME_UKAZ, R.drawable.check);
-	  	    	  else m.put(ATTRIBUTE_NAME_UKAZ, R.drawable.clean);   
+	  	    	  else m.put(ATTRIBUTE_NAME_UKAZ, R.drawable.nopoint);   
 	  	      }
+	  	      // Рамка
+	  	      // Заполняем все пустым
+  	    	  m.put(ATTRIBUTE_NAME_TOP, R.drawable.bproz);   
+  	    	  m.put(ATTRIBUTE_NAME_BOTTOM, R.drawable.bproz);   
+  	    	  m.put(ATTRIBUTE_NAME_LEFT, R.drawable.bproz);   
+  	    	  m.put(ATTRIBUTE_NAME_RIGHT, R.drawable.bproz);   
+	  	      // Расставляем края
+	  	      if ((i>=unhooks.currentLine) && (i<unhooks.currentLine+4)) {
+	  	    	  m.put(ATTRIBUTE_NAME_LEFT, R.drawable.border);   
+	  	    	  m.put(ATTRIBUTE_NAME_RIGHT, R.drawable.border);   	  	    	  
+	  	      };
+	  	      // верх
+	  	      if (i==unhooks.currentLine-1) {
+	  	    	  m.put(ATTRIBUTE_NAME_TOP, R.drawable.border);   	  	    	  	  	    	
+		  	  }	  	    		
+	  	      // низ
+	  	      if (i==unhooks.currentLine+3) {
+	  	    	  m.put(ATTRIBUTE_NAME_BOTTOM, R.drawable.border);   	  	    	  	  	    	
+		  	  }
+	  	      // Вставляем данные
 		      data.add(m);
 		    }
+	    if (unhooks.currentLine==0) insertFirstBlank();
+	    setLastBlank(); // Добавляем пустые при необходимости
 	    // создаем адаптер
 	    sAdapter = new SimpleAdapter(this, data, R.layout.item,
 	        from, to);
@@ -195,25 +224,18 @@ public class HookActivity extends Activity {
     	 
     	// Setting Dialog Message
     	alertDialog2.setMessage("Вы точно хотите отменить расцеп №"+unhooks.getLine(unhooks.currentLine-1).nomer+" ?");
-    	 
-    	// Setting Icon to Dialog
-    	// alertDialog2.setIcon(R.drawable.delete);
-    	 
+
     	// Setting Positive "Yes" Btn
     	alertDialog2.setPositiveButton("ДА",
     	        new DialogInterface.OnClickListener() {
     	            public void onClick(DialogInterface dialog, int which) {
     	                // Write your code here to execute after dialog
     	    	    	// По возврату отменяем выполненную расцепку
-    	            	if (unhooks.currentLine<unhooks.getCount()) {
-    	            		((Map<String, Object>)lvSimple.getItemAtPosition(unhooks.currentLine+1)).put(ATTRIBUTE_NAME_UKAZ, R.drawable.clean);
-    	            	}
     	    			unhooks.currentLine--;
-    	    			if (unhooks.currentLine<unhooks.getCount()) {
-    	    				((Map<String, Object>)lvSimple.getItemAtPosition(unhooks.currentLine+1)).put(ATTRIBUTE_NAME_UKAZ, R.drawable.pointer);
-    	    			}
+    	    			if (unhooks.currentLine==0) insertFirstBlank();
+    	    			updateListView();
+    					lvSimple.smoothScrollToPositionFromTop(unhooks.currentLine, 0);
     	    			new CommThread(CommThread.BACK_COMM, ConnectThread.mmSocket, handler).start(); // Команда серверу
-    	    			sAdapter.notifyDataSetChanged ();
     	    			dialog.cancel();
     	            }
     	        });
@@ -228,5 +250,114 @@ public class HookActivity extends Activity {
     	 
     	// Showing Alert Dialog
     	alertDialog2.show();
+    }
+    
+    private void insertFirstBlank(){
+    	  HashMap<String, Object> m = new HashMap<String, Object>();
+	      m.put(ATTRIBUTE_NAME_TEXT1, "--");
+	      m.put(ATTRIBUTE_NAME_TEXT2, "--");
+	      m.put(ATTRIBUTE_NAME_TEXT3, "-----");
+	      // фон
+	      m.put(ATTRIBUTE_NAME_BACK, R.drawable.clean);
+	      // Указатель или выполнено
+    	  m.put(ATTRIBUTE_NAME_UKAZ, R.drawable.nopoint);   
+	      // Рамка
+	      // Заполняем все пустым
+    	  m.put(ATTRIBUTE_NAME_BOTTOM, R.drawable.bproz);   
+	      // Расставляем края
+    	  m.put(ATTRIBUTE_NAME_LEFT, R.drawable.border);   
+    	  m.put(ATTRIBUTE_NAME_RIGHT, R.drawable.border);   	  	    	  
+	      // верх
+    	  m.put(ATTRIBUTE_NAME_TOP, R.drawable.border);   	  	    	  	  	    	
+	      // Вставляем данные
+	      data.add(0,m);    	
+    }
+    
+    private void removeFirstBlank(){
+    	data.remove(0);
+    }
+    
+    private int getStep(){
+    	if (unhooks.currentLine==0) return 1;
+    	else return 0;
+    }
+    
+    private void setLastBlank(){
+    	// Удаляем старые
+    	int i=(unhooks.getCount()+getStep());
+    	while (i<data.size()){
+    		data.remove(i);
+    	}
+    	// Определяем сколько надо последних блоков
+    	int count=4-(unhooks.getCount()-unhooks.currentLine);
+    	for (i=0;i<count;i++) {
+	      	HashMap<String, Object> m = new HashMap<String, Object>();
+	  	    m.put(ATTRIBUTE_NAME_TEXT1, "--");
+	  	    m.put(ATTRIBUTE_NAME_TEXT2, "--");
+	  	    m.put(ATTRIBUTE_NAME_TEXT3, "-----");
+	  	    // фон
+	  	    m.put(ATTRIBUTE_NAME_BACK, R.drawable.clean);
+	  	    // Указатель или выполнено
+	      	m.put(ATTRIBUTE_NAME_UKAZ, R.drawable.nopoint);   
+	  	    // Рамка
+	  	    // Заполняем все пустым
+	      	m.put(ATTRIBUTE_NAME_TOP, R.drawable.bproz);   
+	      	m.put(ATTRIBUTE_NAME_BOTTOM, R.drawable.bproz);   	  	    	  	  	    	
+	  	    // Расставляем края
+	      	m.put(ATTRIBUTE_NAME_LEFT, R.drawable.border);   
+	      	m.put(ATTRIBUTE_NAME_RIGHT, R.drawable.border);   	  	    	  
+	  	    // низ
+	      	if (i==count-1) m.put(ATTRIBUTE_NAME_BOTTOM, R.drawable.border);   	  	    	  	  	    	
+	  	    // Вставляем данные
+    		data.add(m);
+    	}
+    
+    }
+    
+    // Обновление данных в списке
+    private void updateListView(){
+	    for (int i = 0; i < unhooks.getCount(); i++) {
+	    	  HashMap<String, Object> m = new HashMap<String, Object>();
+		      UnhookLine line=unhooks.getLine(i);		      
+		      m.put(ATTRIBUTE_NAME_TEXT1, line.nomer);
+		      m.put(ATTRIBUTE_NAME_TEXT2, line.count);
+		      m.put(ATTRIBUTE_NAME_TEXT3, line.vagon);
+		      // фон
+	  	      if (line.color==1) {
+	  	    	  m.put(ATTRIBUTE_NAME_BACK, R.drawable.red);
+	  	      } else {	  	      
+	  	    	  m.put(ATTRIBUTE_NAME_BACK, R.drawable.clean);
+	  	      }	  	      
+	  	      // Указатель или выполнено
+	  	      if (i==unhooks.currentLine) {
+	  	    	m.put(ATTRIBUTE_NAME_UKAZ, R.drawable.pointer);
+	  	      } else {
+	  	    	  if (i<unhooks.currentLine) m.put(ATTRIBUTE_NAME_UKAZ, R.drawable.check);
+	  	    	  else m.put(ATTRIBUTE_NAME_UKAZ, R.drawable.nopoint);   
+	  	      }
+	  	      // Рамка
+	  	      // Заполняем все пустым
+	    	  m.put(ATTRIBUTE_NAME_TOP, R.drawable.bproz);   
+	    	  m.put(ATTRIBUTE_NAME_BOTTOM, R.drawable.bproz);   
+	    	  m.put(ATTRIBUTE_NAME_LEFT, R.drawable.bproz);   
+	    	  m.put(ATTRIBUTE_NAME_RIGHT, R.drawable.bproz);   
+	  	      // Расставляем края
+	  	      if ((i>=unhooks.currentLine-1) && (i<unhooks.currentLine+4)) {
+	  	    	  m.put(ATTRIBUTE_NAME_LEFT, R.drawable.border);   
+	  	    	  m.put(ATTRIBUTE_NAME_RIGHT, R.drawable.border);   	  	    	  
+	  	      };
+	  	      // верх
+	  	      if (i==unhooks.currentLine-1) {
+	  	    	  m.put(ATTRIBUTE_NAME_TOP, R.drawable.border);   	  	    	  	  	    	
+		  	  }	  	    		
+	  	      // низ
+	  	      if (i==unhooks.currentLine+3) {
+	  	    	  m.put(ATTRIBUTE_NAME_BOTTOM, R.drawable.border);   	  	    	  	  	    	
+		  	  }
+	  	      // Вставляем данные
+		      data.set(i+getStep(), m);
+		    }
+	    setLastBlank(); // последние пустые
+		sAdapter.notifyDataSetChanged ();	    
     }
 }
