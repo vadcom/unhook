@@ -9,6 +9,8 @@ package com.vadcom.unhook;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.vadcom.unhook.UnhookData.UnhookLine;
 
@@ -45,6 +47,7 @@ public class HookActivity extends Activity {
     UnhookData unhooks=new UnhookData();		// Расцепы
     
     ArrayList<Map<String, Object>> data;
+    Timer tm; 
 	  
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +55,10 @@ public class HookActivity extends Activity {
 		setContentView(R.layout.list);
 		
 		lvSimple = (ListView) findViewById(R.id.lvSimple);
+		
+        tm=new Timer();
+        tm.schedule(timerTask, 5000, 5000);        	// 5 сек			
+
 		/*
 		lvSimple.setOnItemClickListener (new AdapterView.OnItemClickListener(){
 			@Override
@@ -81,6 +88,7 @@ public class HookActivity extends Activity {
 					unhooks.currentLine++;
 					updateListView();
 					lvSimple.smoothScrollToPositionFromTop(unhooks.currentLine, 0);
+	    			new CommThread(CommThread.UNHOOK_COMM, ConnectThread.mmSocket, handler).start(); // Команда серверу
 					return true;
 				}
 				return false;
@@ -126,7 +134,12 @@ public class HookActivity extends Activity {
 			case CommThread.READ_COMM:{
 				// Прочитан список расцепов
 				unhooks=(UnhookData)msg.obj;
-				refreshList();
+				loadList();
+				break;
+			}
+			case CommThread.CURRENT_COMM:{
+				unhooks.currentLine=msg.arg1;
+				updateListView();
 				break;
 			}
 			default: System.err.println("Неизвестный ответ от потока команд");				        		
@@ -136,7 +149,7 @@ public class HookActivity extends Activity {
     /**
      * Загрузка списка отображаемых расцепов
      */
-    private void refreshList(){
+    private void loadList(){
 	    // упаковываем данные в понятную для адаптера структуру
 	    data = new ArrayList<Map<String, Object>>(unhooks.getCount());
 	    Map<String, Object> m;
@@ -176,7 +189,7 @@ public class HookActivity extends Activity {
   	    	  m.put(ATTRIBUTE_NAME_LEFT, R.drawable.bproz);   
   	    	  m.put(ATTRIBUTE_NAME_RIGHT, R.drawable.bproz);   
 	  	      // Расставляем края
-	  	      if ((i>=unhooks.currentLine) && (i<unhooks.currentLine+4)) {
+	  	      if ((i>=unhooks.currentLine-1) && (i<unhooks.currentLine+4)) {
 	  	    	  m.put(ATTRIBUTE_NAME_LEFT, R.drawable.border);   
 	  	    	  m.put(ATTRIBUTE_NAME_RIGHT, R.drawable.border);   	  	    	  
 	  	      };
@@ -197,14 +210,13 @@ public class HookActivity extends Activity {
 	    sAdapter = new SimpleAdapter(this, data, R.layout.item,
 	        from, to);
 	    lvSimple.setAdapter(sAdapter);
-	    //lvSimple.setVerticalFadingEdgeEnabled(true);
-	    //lvSimple.smoothScrollToPosition (12);
+		lvSimple.smoothScrollToPositionFromTop(unhooks.currentLine, 0);
     }
     
     @Override
     public void onBackPressed (){
     	if (unhooks.currentLine>0) {
-			BackStep();
+			backStep();
     	}    	
     }
     
@@ -215,7 +227,7 @@ public class HookActivity extends Activity {
     }
     
     // Отмена расцепа
-    private void BackStep(){
+    private void backStep(){
     	AlertDialog.Builder alertDialog2 = new AlertDialog.Builder(
     			HookActivity.this);
     	 
@@ -360,4 +372,14 @@ public class HookActivity extends Activity {
 	    setLastBlank(); // последние пустые
 		sAdapter.notifyDataSetChanged ();	    
     }
+    
+    // таймер..
+	TimerTask timerTask=new TimerTask() {
+		@Override
+		public void run() {
+			new CommThread(CommThread.CURRENT_COMM, ConnectThread.mmSocket, handler).start(); // Команда серверу
+		}
+    	
+    };
+    
 }

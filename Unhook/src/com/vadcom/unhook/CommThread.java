@@ -33,6 +33,7 @@ public class CommThread extends Thread {
     final static int UNHOOK_COMM=2; 
     final static int CHECK_COMM=3; 
     final static int BACK_COMM=4; 
+    final static int CURRENT_COMM=5; 
     
 //    public class UnhookData
     
@@ -56,7 +57,7 @@ public class CommThread extends Thread {
 		try {
 			switch (mCommand) {
 				case READ_COMM:{
-						doRead();
+					doRead();
 					break;
 				}
 				case UNHOOK_COMM:{
@@ -65,6 +66,10 @@ public class CommThread extends Thread {
 				}
 				case BACK_COMM:{
 					doBack();
+					break;
+				}								
+				case CURRENT_COMM:{
+					doCurrent();
 					break;
 				}								
 				default: System.err.println("Неизвестная команда ПГС->ТГС");				
@@ -98,6 +103,17 @@ public class CommThread extends Thread {
         }
         mHandler.obtainMessage(READ_COMM, data).sendToTarget();
 	}
+	
+	private void doCurrent() throws IOException{
+		// Отправляем запрос
+		String command="current\n";
+   	 	write(command.getBytes());
+   	 	// Получаем ответ
+        String currentTxt=bReader.readLine();
+        int current=Integer.valueOf(currentTxt);
+        mHandler.obtainMessage(CURRENT_COMM, current,-1).sendToTarget();
+	}
+	
 
 	private void doUnhook() throws IOException{
 		// Отправляем запрос

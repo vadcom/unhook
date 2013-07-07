@@ -67,7 +67,11 @@ public class ConnectionThread extends Thread {
 		        if (lineRead.equalsIgnoreCase("back")) {
 		        	commBack(pWriter);
 		        	continue;
-		        } 		        
+		        }
+		        if (lineRead.equalsIgnoreCase("current")) {
+		        	commCurrent(pWriter);
+		        	continue;
+		        } 		        		        
 		        System.out.println("Неизвестная команда: "+lineRead);        		               
 	        }	        
 		} catch (IOException e) {
@@ -107,6 +111,7 @@ public class ConnectionThread extends Thread {
     		System.out.println("Текущий расцеп -> "+unhooks.get(CurrentUnhook));
     		pWriter.write("error\n");
     	}
+        pWriter.flush();
     }
 
     private void commBack(PrintWriter pWriter){
@@ -123,6 +128,13 @@ public class ConnectionThread extends Thread {
     		System.out.println("Текущий расцеп -> "+unhooks.get(CurrentUnhook));
     		pWriter.write("error\n");
     	}
+        pWriter.flush();
+    }
+    
+    private void commCurrent(PrintWriter pWriter){
+    	System.out.println("Выполняем команду CURRENT");
+    	pWriter.write(String.valueOf(server.getCurrent())+'\n');    	
+        pWriter.flush();
     }
 	
 
