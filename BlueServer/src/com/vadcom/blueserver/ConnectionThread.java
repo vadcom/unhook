@@ -1,0 +1,129 @@
+/**
+ *   DEMO BLUETOUCH SERVER
+ */
+package com.vadcom.blueserver;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+
+import javax.bluetooth.RemoteDevice;
+import javax.microedition.io.StreamConnection;
+
+/**
+ * Класс для работы с одним соединением
+ * @author vadim
+ *
+ */
+public class ConnectionThread extends Thread {
+	
+	SampleSPPServer server;
+	StreamConnection connection;
+	ArrayList<String> unhooks;
+	BufferedReader bReader;
+	PrintWriter pWriter;
+	String md5summ="0123210";
+	
+	ConnectionThread (SampleSPPServer server,StreamConnection connection) throws IOException{
+		this.server=server;
+		this.connection=connection;
+        RemoteDevice dev = RemoteDevice.getRemoteDevice(connection);
+        System.out.println("Remote device address: "+dev.getBluetoothAddress());
+        System.out.println("Remote device name: "+dev.getFriendlyName(true));
+              
+        //read string from spp client
+        InputStream inStream=connection.openInputStream();
+        bReader=new BufferedReader(new InputStreamReader(inStream));
+        OutputStream outStream=connection.openOutputStream();
+        pWriter=new PrintWriter(new OutputStreamWriter(outStream));        		
+	}
+	
+	@Override
+	public void run() {
+		super.run();
+		try {
+	        while (true) {
+		        System.out.println("Ожидаем поступления команды...");
+		        String lineRead;
+					lineRead = bReader.readLine();
+		        if (lineRead==null) {
+		        	connection.close();
+		        	System.out.println("Соединение закрыто...");
+		        	return;
+		        }
+		        if (lineRead.equalsIgnoreCase("read")) {
+		        	commRead(pWriter);
+		        	continue;
+		        }
+		        if (lineRead.equalsIgnoreCase("unhook")) {
+		        	commUnhook(pWriter);
+		        	continue;
+		        } 		        
+		        if (lineRead.equalsIgnoreCase("back")) {
+		        	commBack(pWriter);
+		        	continue;
+		        } 		        
+		        System.out.println("Неизвестная команда: "+lineRead);        		               
+	        }	        
+		} catch (IOException e) {
+        	System.err.println("Ошибка! Соединение закрыто...");
+			e.printStackTrace();
+		}			
+	}
+	
+    /**
+     * Команда чтения списка расцепов
+     * @param pWriter
+     */
+    private void commRead(PrintWriter pWriter){
+    	unhooks=server.getUnhooks();
+    	System.out.println("Выполняем команду READ");
+    	pWriter.write(md5summ+'\n');
+    	pWriter.write(String.valueOf(server.getCurrent())+'\n');
+    	pWriter.write(String.valueOf(unhooks.size())+'\n');
+    	for (String line:unhooks) {
+    		pWriter.write(line+'\n');
+    	}
+        pWriter.flush();
+    }
+    
+    private void commUnhook(PrintWriter pWriter){
+    	System.out.println("Выполняем команду UNHOOK");
+    	unhooks=server.getUnhooks();
+    	int CurrentUnhook=server.getCurrent();
+    	if (CurrentUnhook<unhooks.size()) {
+    		CurrentUnhook++;
+    		server.setCurrent(CurrentUnhook);
+    		if (CurrentUnhook<unhooks.size()) System.out.println("Текущий расцеп -> "+unhooks.get(CurrentUnhook));
+    		else System.out.println("Все расцепы выполнены.");
+    		pWriter.write("ok\n");
+    	} else {
+    		System.out.println("Ошибка, выход за конец списка расцепов");
+    		System.out.println("Текущий расцеп -> "+unhooks.get(CurrentUnhook));
+    		pWriter.write("error\n");
+    	}
+    }
+
+    private void commBack(PrintWriter pWriter){
+    	System.out.println("Выполняем команду BACK");
+    	unhooks=server.getUnhooks();
+    	int CurrentUnhook=server.getCurrent();
+    	if (CurrentUnhook>0) {
+    		CurrentUnhook--;
+    		server.setCurrent(CurrentUnhook);
+    		System.out.println("Текущий расцеп -> "+unhooks.get(CurrentUnhook));
+    		pWriter.write("ok\n");
+    	} else {
+    		System.out.println("Ошибка, выход за начало списка расцепов");
+    		System.out.println("Текущий расцеп -> "+unhooks.get(CurrentUnhook));
+    		pWriter.write("error\n");
+    	}
+    }
+	
+
+}
