@@ -21,6 +21,7 @@ import android.os.Handler;
  * @author Дубина Вадим
  */
 public class CommThread extends Thread {
+	private static Object mutex = new Object();	// Для одновременной работы только одного потока	
 	private InputStream mmInStream;
     private OutputStream mmOutStream;
     private Handler mHandler;
@@ -54,29 +55,32 @@ public class CommThread extends Thread {
 	
 	@Override
 	public void run(){
-		try {
-			switch (mCommand) {
-				case READ_COMM:{
-					doRead();
-					break;
+		synchronized (mutex){  // Вход в синхронный блок
+			try {
+				switch (mCommand) {
+					case READ_COMM:{
+						doRead();
+						break;
+					}
+					case UNHOOK_COMM:{
+						doUnhook();
+						break;
+					}
+					case BACK_COMM:{
+						doBack();
+						break;
+					}								
+					case CURRENT_COMM:{
+						doCurrent();
+						break;
+					}								
+					default: System.err.println("Неизвестная команда ПГС->ТГС");				
 				}
-				case UNHOOK_COMM:{
-					doUnhook();
-					break;
-				}
-				case BACK_COMM:{
-					doBack();
-					break;
-				}								
-				case CURRENT_COMM:{
-					doCurrent();
-					break;
-				}								
-				default: System.err.println("Неизвестная команда ПГС->ТГС");				
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}		
+            mutex.notify(); // Будим ждущих
+		}
 	}
 	/**
 	 * Получение списка расцепов от табло 
@@ -121,6 +125,7 @@ public class CommThread extends Thread {
    	 	write(command.getBytes());
    	 	// Получаем ответ
         bReader.readLine();
+        mHandler.obtainMessage(UNHOOK_COMM).sendToTarget();
 	}
 	
 	private void doBack() throws IOException{

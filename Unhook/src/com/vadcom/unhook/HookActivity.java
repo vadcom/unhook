@@ -19,6 +19,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
@@ -47,12 +48,14 @@ public class HookActivity extends Activity {
     UnhookData unhooks=new UnhookData();		// Расцепы
     
     ArrayList<Map<String, Object>> data;
-    Timer tm; 
+    Timer tm;
+    Vibrator vibro;
 	  
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.list);
+		vibro=(Vibrator) getSystemService (VIBRATOR_SERVICE); 
 		
 		lvSimple = (ListView) findViewById(R.id.lvSimple);
 		
@@ -140,6 +143,10 @@ public class HookActivity extends Activity {
 			case CommThread.CURRENT_COMM:{
 				unhooks.currentLine=msg.arg1;
 				updateListView();
+				break;
+			}
+			case CommThread.UNHOOK_COMM:{
+				vibro.vibrate(300);
 				break;
 			}
 			default: System.err.println("Неизвестный ответ от потока команд");				        		

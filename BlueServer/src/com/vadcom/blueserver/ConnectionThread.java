@@ -48,12 +48,12 @@ public class ConnectionThread extends Thread {
 		super.run();
 		try {
 	        while (true) {
-		        System.out.println("Ожидаем поступления команды...");
+		        System.out.println("Wait command...");
 		        String lineRead;
 					lineRead = bReader.readLine();
 		        if (lineRead==null) {
 		        	connection.close();
-		        	System.out.println("Соединение закрыто...");
+		        	System.out.println("Connection closed...");
 		        	return;
 		        }
 		        if (lineRead.equalsIgnoreCase("read")) {
@@ -72,7 +72,7 @@ public class ConnectionThread extends Thread {
 		        	commCurrent(pWriter);
 		        	continue;
 		        } 		        		        
-		        System.out.println("Неизвестная команда: "+lineRead);        		               
+		        System.out.println("Unknown command: "+lineRead);        		               
 	        }	        
 		} catch (IOException e) {
         	System.err.println("Ошибка! Соединение закрыто...");
@@ -86,7 +86,7 @@ public class ConnectionThread extends Thread {
      */
     private void commRead(PrintWriter pWriter){
     	unhooks=server.getUnhooks();
-    	System.out.println("Выполняем команду READ");
+    	System.out.println("Process command READ");
     	pWriter.write(md5summ+'\n');
     	pWriter.write(String.valueOf(server.getCurrent())+'\n');
     	pWriter.write(String.valueOf(unhooks.size())+'\n');
@@ -97,42 +97,44 @@ public class ConnectionThread extends Thread {
     }
     
     private void commUnhook(PrintWriter pWriter){
-    	System.out.println("Выполняем команду UNHOOK");
+    	System.out.println("Process command UNHOOK");
     	unhooks=server.getUnhooks();
     	int CurrentUnhook=server.getCurrent();
     	if (CurrentUnhook<unhooks.size()) {
     		CurrentUnhook++;
     		server.setCurrent(CurrentUnhook);
-    		if (CurrentUnhook<unhooks.size()) System.out.println("Текущий расцеп -> "+unhooks.get(CurrentUnhook));
-    		else System.out.println("Все расцепы выполнены.");
+    		if (CurrentUnhook<unhooks.size()) System.out.println("Current unhook -> "+unhooks.get(CurrentUnhook));
+    		else System.out.println("All unhooks done.");
     		pWriter.write("ok\n");
     	} else {
-    		System.out.println("Ошибка, выход за конец списка расцепов");
-    		System.out.println("Текущий расцеп -> "+unhooks.get(CurrentUnhook));
+    		System.out.println("Error, out of bounds list");
+    		System.out.println("Current unhook -> "+unhooks.get(CurrentUnhook));
     		pWriter.write("error\n");
     	}
         pWriter.flush();
     }
 
     private void commBack(PrintWriter pWriter){
-    	System.out.println("Выполняем команду BACK");
+    	System.out.println("Process command BACK");
     	unhooks=server.getUnhooks();
     	int CurrentUnhook=server.getCurrent();
     	if (CurrentUnhook>0) {
     		CurrentUnhook--;
     		server.setCurrent(CurrentUnhook);
-    		System.out.println("Текущий расцеп -> "+unhooks.get(CurrentUnhook));
+    		System.out.println("Current unhook -> "+unhooks.get(CurrentUnhook));
     		pWriter.write("ok\n");
     	} else {
-    		System.out.println("Ошибка, выход за начало списка расцепов");
-    		System.out.println("Текущий расцеп -> "+unhooks.get(CurrentUnhook));
+    		System.out.println("Error, out of bounds list");
+    		System.out.println("Current unhook -> "+unhooks.get(CurrentUnhook));
     		pWriter.write("error\n");
     	}
         pWriter.flush();
     }
     
     private void commCurrent(PrintWriter pWriter){
-    	System.out.println("Выполняем команду CURRENT");
+    	int CurrentUnhook=server.getCurrent();
+    	System.out.println("Process command CURRENT");
+		System.out.println("Current unhook -> "+unhooks.get(CurrentUnhook));
     	pWriter.write(String.valueOf(server.getCurrent())+'\n');    	
         pWriter.flush();
     }

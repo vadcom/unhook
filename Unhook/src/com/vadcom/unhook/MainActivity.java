@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.view.Menu;
@@ -108,6 +109,7 @@ public class MainActivity extends Activity {
 			} else {
 				// Выбираем нужное устройство
 				BluetoothDevice dev=getDevice("notebook-1");
+				//if (dev==null) dev=getDevice("ALENA");
 				if (dev!=null) {				
 					// Стартуем соединение
 					Thread ct=new ConnectThread(dev,handler);
@@ -155,10 +157,17 @@ public class MainActivity extends Activity {
 		// If there are paired devices
 		if (pairedDevices.size() > 0) {
 		    // Loop through paired devices
+			// Подключаемся к первому компьютеру
 		    for (BluetoothDevice device : pairedDevices) {
-		        if (device.getName().equalsIgnoreCase("notebook-1")){
+		    	int classDevice=device.getBluetoothClass().getMajorDeviceClass();
+		        if (classDevice == BluetoothClass.Device.Major.COMPUTER) {
 		        	return device; 
 		        }
+		    	/*
+		        if (device.getName().equalsIgnoreCase(name)){
+		        	return device; 
+		        }
+		        */
 		    }
 		}
 		return null;
