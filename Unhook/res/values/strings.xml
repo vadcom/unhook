@@ -7,10 +7,11 @@
     <string name="get_data">Получение данных</string>
     <string name="getted">Данные получены</string>
     <string name="col1">№</string>
-    <string name="co2">Количество</string>
+    <string name="co2">Кол.</string>
     <string name="col3">Последний вагон</string>
     <string name="doConnect">Соединиться</string>
     <string name="startConnect">Установка соединения</string>
     <string name="errorConnect">Нет соединения</string>
+    <string name="metka">Условная отметка</string>
 
 </resources>

@@ -36,6 +36,7 @@ public class HookActivity extends Activity {
     final String ATTRIBUTE_NAME_TEXT1 = "text1";
     final String ATTRIBUTE_NAME_TEXT2 = "text2";
     final String ATTRIBUTE_NAME_TEXT3 = "text3";
+    final String ATTRIBUTE_NAME_METKA = "metka";
     final String ATTRIBUTE_NAME_UKAZ = "image";
     final String ATTRIBUTE_NAME_BACK = "back";
     final String ATTRIBUTE_NAME_TOP = "top";
@@ -161,14 +162,14 @@ public class HookActivity extends Activity {
 	    data = new ArrayList<Map<String, Object>>(unhooks.getCount());
 	    Map<String, Object> m;
 	    // массив имен атрибутов, из которых будут читаться данные
-	    String[] from = { ATTRIBUTE_NAME_TEXT1, ATTRIBUTE_NAME_TEXT2,ATTRIBUTE_NAME_TEXT3,
+	    String[] from = { ATTRIBUTE_NAME_TEXT1, ATTRIBUTE_NAME_TEXT2,ATTRIBUTE_NAME_TEXT3,ATTRIBUTE_NAME_METKA,
 	    				  ATTRIBUTE_NAME_UKAZ,ATTRIBUTE_NAME_BACK,
 	    				  ATTRIBUTE_NAME_TOP,
 					      ATTRIBUTE_NAME_BOTTOM,
 					      ATTRIBUTE_NAME_LEFT,
 					      ATTRIBUTE_NAME_RIGHT};
 	    // массив ID View-компонентов, в которые будут вставлять данные
-	    int[] to = { R.id.textNomer, R.id.textCount,  R.id.textVagon,R.id.imageUkaz,R.id.imageView1,
+	    int[] to = { R.id.textNomer, R.id.textCount,  R.id.textVagon,R.id.textMetka,R.id.imageUkaz,R.id.imageView1,
 	    		     R.id.borderTop,R.id.borderBottom,R.id.borderLeft,R.id.borderRight};	    
 	    for (int i = 0; i < unhooks.getCount(); i++) {
 		      m = new HashMap<String, Object>();
@@ -176,6 +177,7 @@ public class HookActivity extends Activity {
 		      m.put(ATTRIBUTE_NAME_TEXT1, line.nomer);
 		      m.put(ATTRIBUTE_NAME_TEXT2, line.count);
 		      m.put(ATTRIBUTE_NAME_TEXT3, line.vagon);
+		      m.put(ATTRIBUTE_NAME_METKA, line.metka);
 		      // фон
 	  	      if (line.color==1) {
 	  	    	  m.put(ATTRIBUTE_NAME_BACK, R.drawable.red);
@@ -341,6 +343,7 @@ public class HookActivity extends Activity {
 		      m.put(ATTRIBUTE_NAME_TEXT1, line.nomer);
 		      m.put(ATTRIBUTE_NAME_TEXT2, line.count);
 		      m.put(ATTRIBUTE_NAME_TEXT3, line.vagon);
+		      m.put(ATTRIBUTE_NAME_METKA, line.metka);
 		      // фон
 	  	      if (line.color==1) {
 	  	    	  m.put(ATTRIBUTE_NAME_BACK, R.drawable.red);

@@ -19,13 +19,15 @@ public class UnhookData {
 		int count;		// количество вагонов в сцепке
 		String vagon;   // 5 цифр последнего вагона
 		int color;		// цветовое предупреждение
+		String metka;	// Символьная метка
 		// Инициализация через строчку
 		UnhookLine (String line) {			
-			String[] param=line.split(" ", 4);
+			String[] param=line.split(" ", 5);
 			nomer=Integer.valueOf(param[0]);
 			count=Integer.valueOf(param[1]);
 			vagon=param[2];
 			color=Integer.valueOf(param[3]);
+			metka=param[4];
 		}
 	}
 	List<UnhookLine> data=new ArrayList<UnhookLine>();
